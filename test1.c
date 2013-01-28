@@ -11,12 +11,12 @@ main(int argc, char **argv)
 {
     int r;
     wregexp_match_t m;
-    wchar_t *t1 = L"ababcabc";
+    wchar_t *t1 = L"abababc";
 
     r = wregexp_match(L"abc", t1, &m);
     ASSERT(r == 1);
-    ASSERT(m.start == t1 + 2);
-    ASSERT(m.end == t1 + 5);
+    ASSERT(m.start == t1 + 4);
+    ASSERT(m.end == t1 + 7);
 
     return 0;
 }
