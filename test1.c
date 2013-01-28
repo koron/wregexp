@@ -2,34 +2,30 @@
 
 #include "wregexp.h"
 
-#define ASSERT(expr)    do { \
-    if (!(expr)) { printf("failed: %s\n", #expr); return 1; } \
-} while (0)
+#define ASSERT(expr) \
+    do { if (!(expr)) { \
+        printf("failed at file %s line %d: %s\n", __FILE__, __LINE__, #expr); \
+        return 1; \
+    } } while (0)
 
     int
 main(int argc, char **argv)
 {
-    {
-        int r1;
-        wregexp_match_t m1;
-        wchar_t *t1 = L"abababc";
+    int r;
+    wregexp_match_t m;
+    const wchar_t *t;
 
-        r1 = wregexp_match(L"abc", t1, &m1);
-        ASSERT(r1 == 1);
-        ASSERT(m1.start == t1 + 4);
-        ASSERT(m1.end == t1 + 7);
-    }
+    t = L"abababc";
+    r = wregexp_match(L"abc", t, &m);
+    ASSERT(r == 1);
+    ASSERT(m.start == t + 4);
+    ASSERT(m.end == t + 7);
 
-    {
-        int r2;
-        wregexp_match_t m2;
-        wchar_t *t2 = L"ababcab";
-
-        r2 = wregexp_match(L"abc", t2, &m2);
-        ASSERT(r2 == 1);
-        ASSERT(m2.start == t2 + 2);
-        ASSERT(m2.end == t2 + 5);
-    }
+    t = L"ababcab";
+    r = wregexp_match(L"abc", t, &m);
+    ASSERT(r == 1);
+    ASSERT(m.start == t + 2);
+    ASSERT(m.end == t + 5);
 
     return 0;
 }
