@@ -1,5 +1,17 @@
 #include "wregexp.h"
 
+    static int inline
+is_pattern_end(const wchar_t *p)
+{
+    return *p == L'\0';
+}
+
+    static int inline
+is_item_match(const wchar_t *p, const wchar_t *t)
+{
+    return *p == *t ? 1: 0;
+}
+
     int
 wregexp_match(
         const wchar_t *pattern,
@@ -14,7 +26,8 @@ wregexp_match(
     t0 = t;
     while (1)
     {
-        if (*p == L'\0')
+        int r;
+        if (is_pattern_end(p))
         {
             m.start = t0;
             m.end = t;
@@ -22,15 +35,18 @@ wregexp_match(
         }
         else if (*t == L'\0')
             break;
-        else if (*t != *p)
+        if ((r = is_item_match(p, t)) > 0)
         {
-            t = ++t0;
-            p = pattern;
+            /* forward pattern and input text. */
+            p += r;
+            ++t;
         }
         else
         {
-            ++t;
-            ++p;
+            /* reset pattern. */
+            p = pattern;
+            /* backtrack input text. */
+            t = ++t0;
         }
     }
 
