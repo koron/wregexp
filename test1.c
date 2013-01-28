@@ -4,7 +4,7 @@
 
 #define ASSERT(expr)    do { \
     if (!(expr)) { printf("failed: %s\n", #expr); return 1; } \
-} while (0);
+} while (0)
 
     int
 main(int argc, char **argv)
