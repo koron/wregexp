@@ -1,15 +1,30 @@
+#include <assert.h>
+
 #include "wregexp.h"
 
-    static int inline
-is_pattern_end(const wchar_t *p)
+    static const wchar_t *
+get_end(const wchar_t *p)
 {
-    return *p == L'\0';
+    return p + wcslen(p);
 }
 
     static int inline
-is_item_match(const wchar_t *p, const wchar_t *t)
+is_end(const wchar_t *p, const wchar_t *end)
 {
-    return *p == *t ? 1: 0;
+    return p > end;
+}
+
+    static int inline
+is_item_match(const wchar_t *p, const wchar_t *t, int *step)
+{
+    wchar_t pch = *p;
+
+    if (pch == L'\0' || pch == *t)
+    {
+        *step = 1;
+        return 1;
+    }
+    return 0;
 }
 
     int
@@ -20,25 +35,25 @@ wregexp_match(
 {
     wregexp_match_t m = { NULL, NULL };
     const wchar_t *t = text;
-    const wchar_t *t0;
+    const wchar_t *t_end = get_end(t);
     const wchar_t *p = pattern;
+    const wchar_t *p_end = get_end(p);
+    const wchar_t *t0;
 
     t0 = t;
     while (1)
     {
-        int r;
-        if (is_pattern_end(p))
-        {
-            m.start = t0;
-            m.end = t;
-            break;
-        }
-        else if (*t == L'\0')
-            break;
-        if ((r = is_item_match(p, t)) > 0)
+        int step = 0;
+        if (is_item_match(p, t, &step))
         {
             /* forward pattern and input text. */
-            p += r;
+            p += step;
+            if (is_end(p, p_end))
+            {
+                m.start = t0;
+                m.end = t;
+                break;
+            }
             ++t;
         }
         else
@@ -48,6 +63,8 @@ wregexp_match(
             /* backtrack input text. */
             t = ++t0;
         }
+        if (is_end(t, t_end))
+            break;
     }
 
     if (match != NULL) {
