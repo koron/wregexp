@@ -17,14 +17,29 @@ is_end(const wchar_t *p, const wchar_t *end)
     static int inline
 is_item_match(const wchar_t *p, const wchar_t *t, int *step)
 {
+    int r = 0, s = 0;
     wchar_t pch = *p;
 
-    if (pch == L'\0' || pch == *t)
+    switch (pch)
     {
-        *step = 1;
-        return 1;
+        case '.':
+            if (*t != L'\0')
+                s = 1, r = 1;
+            break;
+
+        case L'\0':
+            s = 1, r = 1;
+            break;
+
+        default:
+            if (pch == *t)
+                s = 1, r = 1;
+            break;
     }
-    return 0;
+
+    if (step != NULL)
+        *step = s;
+    return r;
 }
 
     int

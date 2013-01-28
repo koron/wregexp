@@ -27,5 +27,11 @@ main(int argc, char **argv)
     ASSERT(m.start == t + 2);
     ASSERT(m.end == t + 5);
 
+    t = L"aaaabaaaa";
+    r = wregexp_match(L"ab.a", t, &m);
+    ASSERT(r == 1);
+    ASSERT(m.start == t + 3);
+    ASSERT(m.end == t + 7);
+
     return 0;
 }
