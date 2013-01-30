@@ -4,11 +4,20 @@
 
 #include "wregexp.h"
 
+enum {
+    CODE_NONE = 0,
+    CODE_ANY = 1
+};
+
 struct wregexp_prog_s
 {
-    int flags;
+    int term:1;
+    int code:4;
     wchar_t ch;
 };
+
+#define SET_PROG(p, t, c, w)    \
+    (p)->term = (t), (p)->code = (c), (p)->ch = w
 
     wregexp_prog_t *
 wregexp_prog_compile(
@@ -39,12 +48,23 @@ wregexp_prog_compile(
     end = prog + len;
     for (p = prog; p < end; ++p)
     {
-        p->flags = 0;
-        p->ch = *pattern;
+        wchar_t ch = *pattern;
+        switch (ch)
+        {
+            case '\0':
+                break;
+
+            case '.':
+                SET_PROG(p, 0, CODE_ANY, L'.');
+                break;
+
+            default:
+                SET_PROG(p, 0, CODE_NONE, ch);
+                break;
+        }
         ++pattern;
     }
-    end->flags = 1;
-    end->ch = L'\0';
+    SET_PROG(p, 1, CODE_NONE, L'\0');
 END:
     if (err != NULL)
         *err = result;
