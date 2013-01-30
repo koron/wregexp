@@ -1,6 +1,90 @@
 #include <assert.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #include "wregexp.h"
+
+struct wregexp_prog_s
+{
+    int flags;
+    wchar_t ch;
+};
+
+    wregexp_prog_t *
+wregexp_prog_compile(
+        const wchar_t *pattern,
+        int *err)
+{
+    size_t len;
+    int result = WREGEXP_OK;
+    wregexp_prog_t *prog = NULL;
+    wregexp_prog_t *end = NULL;
+    wregexp_prog_t *p = NULL;
+
+    /* Check pattern length. */
+    len = wcslen(pattern);
+    if (len >= INT_MAX)
+    {
+        result = WREGEXP_TOOLONG;
+        goto END;
+    }
+    /* Allocate memory for regexp program. */
+    prog = calloc(sizeof(*prog), len + 1);
+    if (prog == NULL)
+    {
+        result = WREGEXP_LOWMEM;
+        goto END;
+    }
+    /* Initialize regexp program. */
+    end = prog + len;
+    for (p = prog; p < end; ++p)
+    {
+        p->flags = 0;
+        p->ch = *pattern;
+        ++pattern;
+    }
+    end->flags = 1;
+    end->ch = L'\0';
+END:
+    if (err != NULL)
+        *err = result;
+    return prog;
+}
+
+    void
+wregexp_prog_free(
+        wregexp_prog_t *prog)
+{
+    if (prog != NULL)
+        free(prog);
+}
+
+    int
+wregexp_prog_match(
+        wregexp_prog_t *prog,
+        const wchar_t *text,
+        wregexp_match_t *match)
+{
+    /* TODO */
+    return 0;
+}
+
+    int
+wregexp_match2(
+        const wchar_t *pattern,
+        const wchar_t *text,
+        wregexp_match_t *match)
+{
+    int retval = -1;
+    int err = 0;
+    wregexp_prog_t *prog;
+
+    prog = wregexp_prog_compile(pattern, &err);
+    if (prog != NULL && err != 0)
+        retval = wregexp_prog_match(prog, text, match);
+    wregexp_prog_free(prog);
+    return retval;
+}
 
     static const wchar_t *
 get_end(const wchar_t *p)
